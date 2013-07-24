@@ -9,10 +9,21 @@
 
 
 # NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
-CFLAGS=-Wall -Wextra -pedantic -O6
-CPPFLAGS=
-LDFLAGS=
-C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+OPTIMISATION=-O6
+
+CFLAGS = -Wall -Wextra -pedantic $(OPTIMISATION)
+CPPFLAGS =
+LDFLAGS =
+C_FLAGS = $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+
+SPIKE = $${SPIKE_PATH}
+OPT = $(SPIKE)/add-on
+OPTBIN = $(OPT)/libexec
+
+PREFIX = /usr
+DATA = /share
+LICENSES = $(DATA)/licenses
+PKGNAME = spike-ckeccak
 
 
 all: c
@@ -28,9 +39,28 @@ obj/%.o: src/%.c src/%.h
 	$(CC) $(C_FLAGS) -c -o "$@" "$<"
 
 
+install: bin/spike-ckeccak
+	install -d -- "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"
+	install -m644 -- COPYING LICENSE "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"
+	install -d -- "$(DESTDIR)$(OPT)"
+	install -m755 -- src/spike-ckeccak.py "$(DESTDIR)$(OPT)"
+	install -d -- "$(DESTDIR)$(OPTBIN)"
+	install -m755 -- bin/spike-ckeccak "$(DESTDIR)$(OPTBIN)"
+
+
+uninstall:
+	-rm -- "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"/COPYING
+	-rm -- "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"/LICENSE
+	-rmdir -- "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"
+	-rm -- "$(DESTDIR)$(OPTBIN)"
+	-rmdir -- "$(DESTDIR)$(OPTBIN)"/spike-ckeccak
+	-rm -- "$(DESTDIR)$(OPT)"/spike-ckeccak.py
+	-rmdir -- "$(DESTDIR)$(OPT)"
+
+
 clean:
 	-rm -r obj bin 2>/dev/null
 
 
-.PHONY: all c clean
+.PHONY: all c install uninstall clean
 
