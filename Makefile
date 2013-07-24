@@ -16,7 +16,7 @@ C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 
 
-c: obj/sha3.o
+c: obj/sha3.o obj/mane.o
 obj/%.o: src/%.c src/%.h
 	mkdir -p "obj"
 	$(CC) $(C_FLAGS) -c -o "$@" "$<"
