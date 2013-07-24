@@ -37,8 +37,9 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
 {
   char* chunk = (char*)malloc(4096);
   long f, fail = false, lastblksize = 4096;
-  char out[144];
+  char out[145];
   struct stat attr;
+  *(out + 144) = 0;
   
   for (f = 1; f < argc; f++)
     {
