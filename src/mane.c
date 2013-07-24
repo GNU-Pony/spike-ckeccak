@@ -38,6 +38,7 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
   char* chunk = (char*)malloc(4096);
   long f, fail = false, lastblksize = 4096;
   char out[144];
+  struct stat attr;
   
   for (f = 1; f < argc; f++)
     {
@@ -54,7 +55,7 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
 	  continue;
 	}
       
-      blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
+      blksize = stat(*(argv + f), &attr) ? 4096 : attr.st_blksize;
       if (blksize > lastblksize)
 	chunk = (char*)realloc(chunk, lastblksize = blksize);
       
