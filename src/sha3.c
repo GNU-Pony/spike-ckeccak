@@ -176,23 +176,6 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
 
 
 /**
- * Binary logarithm
- * 
- * @param   x  The value of which to calculate the binary logarithm
- * @return     The binary logarithm
- */
-static long lb(long x)
-{
-  long rc = 0;
-  if ((x & 0xFF00) != 0)  { rc +=  8;  x >>=  8; }
-  if ((x & 0x00F0) != 0)  { rc +=  4;  x >>=  4; }
-  if ((x & 0x000C) != 0)  { rc +=  2;  x >>=  2; }
-  if ((x & 0x0002) != 0)    rc +=  1;
-  return rc;
-}
-
-
-/**
  * Perform one round of computation
  * 
  * @param  A   The current state
