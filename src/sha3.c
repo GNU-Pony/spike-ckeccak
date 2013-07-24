@@ -219,16 +219,6 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
 
 
 /**
- * Rotate a word
- * 
- * @param   X:llong  The value to rotate
- * @param   N:long   Rotation steps, may not be 0
- * @return   :llong  The value rotated
- */
-#define rotate(X, N)  ((((X) >> (w - ((N) % w))) + ((X) << ((N) % w))) & wmod)
-
-
-/**
  * Rotate a 64-bit word
  * 
  * @param   X:llong  The value to rotate
@@ -280,28 +270,14 @@ static void keccakFRound(llong* A, llong rc)
   de = C[3] ^ rotate64(C[0], 1);
   dc = C[1] ^ rotate64(C[3], 1);
   
-  if (w == 64)
-    {
-      /* ρ and π steps, with last two part of θ */
-      #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate64(A[Ai] ^ Dv, R)
-      B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
-      __B( 5,  6, db, 44);  __B( 6, 21, de, 20);  __B( 7, 11, dc,  6);  __B( 8,  1, da, 36);  __B( 9, 16, dd, 55);
-      __B(10, 12, dc, 43);  __B(11,  2, da,  3);  __B(12, 17, dd, 25);  __B(13,  7, db, 10);  __B(14, 22, de, 39);
-      __B(15, 18, dd, 21);  __B(16,  8, db, 45);  __B(17, 23, de,  8);  __B(18, 13, dc, 15);  __B(19,  3, da, 41);
-      __B(20, 24, de, 14);  __B(21, 14, dc, 61);  __B(22,  4, da, 18);  __B(23, 19, dd, 56);  __B(24,  9, db,  2);
-      #undef __B
-    }
-  else
-    {
-      /* ρ and π steps, with last two part of θ */
-      #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate(A[Ai] ^ Dv, R)
-      B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
-      __B( 5,  6, db, 44);  __B( 6, 21, de, 20);  __B( 7, 11, dc,  6);  __B( 8,  1, da, 36);  __B( 9, 16, dd, 55);
-      __B(10, 12, dc, 43);  __B(11,  2, da,  3);  __B(12, 17, dd, 25);  __B(13,  7, db, 10);  __B(14, 22, de, 39);
-      __B(15, 18, dd, 21);  __B(16,  8, db, 45);  __B(17, 23, de,  8);  __B(18, 13, dc, 15);  __B(19,  3, da, 41);
-      __B(20, 24, de, 14);  __B(21, 14, dc, 61);  __B(22,  4, da, 18);  __B(23, 19, dd, 56);  __B(24,  9, db,  2);
-      #undef __B
-    }
+  /* ρ and π steps, with last two part of θ */
+  #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate64(A[Ai] ^ Dv, R)
+  B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
+  __B( 5,  6, db, 44);  __B( 6, 21, de, 20);  __B( 7, 11, dc,  6);  __B( 8,  1, da, 36);  __B( 9, 16, dd, 55);
+  __B(10, 12, dc, 43);  __B(11,  2, da,  3);  __B(12, 17, dd, 25);  __B(13,  7, db, 10);  __B(14, 22, de, 39);
+  __B(15, 18, dd, 21);  __B(16,  8, db, 45);  __B(17, 23, de,  8);  __B(18, 13, dc, 15);  __B(19,  3, da, 41);
+  __B(20, 24, de, 14);  __B(21, 14, dc, 61);  __B(22,  4, da, 18);  __B(23, 19, dd, 56);  __B(24,  9, db,  2);
+  #undef __B
   
   /* ξ step */
   #define __A(X, X5, X10)  A[X] = B[X] ^ ((~(B[X5])) & B[X10])
@@ -324,57 +300,30 @@ static void keccakFRound(llong* A, llong rc)
  */
 static void keccakF(llong* A)
 {
-  long i;
-  if (nr == 24)
-    {
-      keccakFRound(A, 0x0000000000000001);
-      keccakFRound(A, 0x0000000000008082);
-      keccakFRound(A, 0x800000000000808A);
-      keccakFRound(A, 0x8000000080008000);
-      keccakFRound(A, 0x000000000000808B);
-      keccakFRound(A, 0x0000000080000001);
-      keccakFRound(A, 0x8000000080008081);
-      keccakFRound(A, 0x8000000000008009);
-      keccakFRound(A, 0x000000000000008A);
-      keccakFRound(A, 0x0000000000000088);
-      keccakFRound(A, 0x0000000080008009);
-      keccakFRound(A, 0x000000008000000A);
-      keccakFRound(A, 0x000000008000808B);
-      keccakFRound(A, 0x800000000000008B);
-      keccakFRound(A, 0x8000000000008089);
-      keccakFRound(A, 0x8000000000008003);
-      keccakFRound(A, 0x8000000000008002);
-      keccakFRound(A, 0x8000000000000080);
-      keccakFRound(A, 0x000000000000800A);
-      keccakFRound(A, 0x800000008000000A);
-      keccakFRound(A, 0x8000000080008081);
-      keccakFRound(A, 0x8000000000008080);
-      keccakFRound(A, 0x0000000080000001);
-      keccakFRound(A, 0x8000000080008008);
-    }
-  else
-    for (i = 0; i < nr; i++)
-      keccakFRound(A, RC[i] & wmod);
-}
-
-
-/**
- * Convert a chunk of byte:s to a word
- * 
- * @param   message  The message
- * @param   msglen   The length of the message
- * @param   rr       Bitrate in bytes
- * @param   ww       Word size in bytes
- * @param   off      The offset in the message
- * @return           Lane
- */
-inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
-{
-  llong rc = 0;
-  long n = min(msglen, rr), i;
-  for (i = off + ww - 1; i >= off; i--)
-    rc = (rc << 8) | ((i < n) ? (llong)(message[i] & 255) : 0L);
-  return rc;
+  keccakFRound(A, 0x0000000000000001);
+  keccakFRound(A, 0x0000000000008082);
+  keccakFRound(A, 0x800000000000808A);
+  keccakFRound(A, 0x8000000080008000);
+  keccakFRound(A, 0x000000000000808B);
+  keccakFRound(A, 0x0000000080000001);
+  keccakFRound(A, 0x8000000080008081);
+  keccakFRound(A, 0x8000000000008009);
+  keccakFRound(A, 0x000000000000008A);
+  keccakFRound(A, 0x0000000000000088);
+  keccakFRound(A, 0x0000000080008009);
+  keccakFRound(A, 0x000000008000000A);
+  keccakFRound(A, 0x000000008000808B);
+  keccakFRound(A, 0x800000000000008B);
+  keccakFRound(A, 0x8000000000008089);
+  keccakFRound(A, 0x8000000000008003);
+  keccakFRound(A, 0x8000000000008002);
+  keccakFRound(A, 0x8000000000000080);
+  keccakFRound(A, 0x000000000000800A);
+  keccakFRound(A, 0x800000008000000A);
+  keccakFRound(A, 0x8000000080008081);
+  keccakFRound(A, 0x8000000000008080);
+  keccakFRound(A, 0x0000000080000001);
+  keccakFRound(A, 0x8000000080008008);
 }
 
 
@@ -500,33 +449,22 @@ inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
 
 
 /**
- * Initialise Keccak sponge
- * 
- * @param  bitrate   The bitrate
- * @param  capacity  The capacity
- * @param  output    The output size
+ * Initialise Keccak[r=1024, c=576, n=576] sponge
  */
-extern void initialise(long bitrate, long capacity, long output)
+extern void initialise()
 {
   long i;
   
-  r = bitrate;
-  n = output;
-  c = capacity;
-  b = r + c;
-  w = b / 25;
-  l = lb(w);
-  nr = 12 + (l << 1);
-  if (w == 64)
-    wmod = -1;
-  else
-    {
-      wmod = 1;
-      wmod <<= w;
-      wmod--;
-    }
+  r = 1024;
+  n = 576;
+  c = 576;
+  b = 1600;
+  w = 64;
+  l = 6;
+  nr = 24;
+  wmod = -1;
   S = (llong*)malloc(25 * sizeof(llong));
-  M = (byte*)malloc(mlen = (r * b) >> 2);
+  M = (byte*)malloc(mlen = 409600);
   mptr = 0;
   
   for (i = 0; i < 25; i++)
@@ -558,8 +496,8 @@ extern void dispose()
  */
 extern void update(byte* msg, long msglen)
 {
-  long rr = r >> 3;
-  long ww = w >> 3;
+  long rr = 128;
+  long ww = 8;
   long i, len;
   byte* message;
   
@@ -579,30 +517,17 @@ extern void update(byte* msg, long msglen)
   revarraycopy(M, len, M, 0, mptr);
   
   /* Absorbing phase */
-  if (ww == 8)
-    for (i = 0; i < len; i += rr)
-      {
-	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
-	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
-	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
-	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
-	__S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
-	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
-        #undef __S
-	keccakF(S);
-      }
-  else
-    for (i = 0; i < len; i += rr)
-      {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
-	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
-	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
-	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
-	__S( 3, 15);  __S( 8, 16);  __S(13, 17);  __S(18, 18);  __S(23, 19);
-	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
-        #undef __S
-	keccakF(S);
-      }
+  for (i = 0; i < len; i += rr)
+    {
+      #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+      __S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
+      __S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
+      __S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
+      __S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
+      __S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
+      #undef __S
+      keccakF(S);
+    }
   
   free(message);
 }
@@ -620,9 +545,9 @@ extern byte* digest(byte* msg, long msglen, boolean withReturn)
 {
   byte* message;
   byte* rc;
-  long rr = r >> 3, len;
+  long rr = 128, len;
   long nn = (n + 7) >> 3, olen;
-  long ww = w >> 3, ni;
+  long ww = 8, ni;
   long i, j = 0, ptr = 0, _;
   
   if ((msg == null) || (msglen == 0))
@@ -644,30 +569,17 @@ extern byte* digest(byte* msg, long msglen, boolean withReturn)
   rc = (byte*)malloc((n + 7) >> 3);
   
   /* Absorbing phase */
-  if (ww == 8)
-    for (i = 0; i < len; i += rr)
-      {
-	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
-	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
-	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
-	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
-	__S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
-	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
-        #undef __S
-	keccakF(S);
-      }
-  else
-    for (i = 0; i < len; i += rr)
-      {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
-	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
-	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
-	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
-	__S( 3, 15);  __S( 8, 16);  __S(13, 17);  __S(18, 18);  __S(23, 19);
-	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
-        #undef __S
-	keccakF(S);
-      }
+  for (i = 0; i < len; i += rr)
+    {
+      #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+      __S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
+      __S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
+      __S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
+      __S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
+      __S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
+      #undef __S
+      keccakF(S);
+    }
   
   free(message);
   
@@ -703,80 +615,5 @@ extern byte* digest(byte* msg, long msglen, boolean withReturn)
   while ((olen -= r) > 0)
     keccakF(S);
   return null;
-}
-
-
-/**
- * Force some rounds of Keccak-f
- * 
- * @param  times  The number of rounds
- */
-extern void simpleSqueeze(long times)
-{
-  long i;
-  for (i = 0; i < times; i++)
-    keccakF(S);
-}
-
-
-/**
- * Squeeze as much as is needed to get a digest a number of times
- * 
- * @param  times  The number of digests
- */
-extern void fastSqueeze(long times)
-{
-  long i, olen;
-  for (i = 0; i < times; i++)
-    {
-      keccakF(S); /* Last squeeze did not do a ending squeeze */
-      olen = n;
-      while ((olen -= r) > 0)
-	keccakF(S);
-    }
-}
-
-
-/**
- * Squeeze out another digest
- * 
- * @return  The hash sum
- */
-extern byte* squeeze()
-{
-  long nn, ww, olen, i, j, ptr, ni;
-  byte* rc;
-  
-  keccakF(S); /* Last squeeze did not do a ending squeeze */
-  
-  ww = w >> 3;
-  rc = (byte*)malloc(nn = (n + 7) >> 3);
-  olen = n;
-  j = ptr = 0;
-  ni = (25 < r >> 3) ? 25 : (r >> 3);
-  
-  while (olen > 0)
-    {
-      i = 0;
-      while ((i < ni) && (j < nn))
-	{
-	  long _, v = S[(i % 5) * 5 + i / 5];
-	  for (_ = 0; _ < ww; _++)
-	    {
-	      if (j < nn)
-		*(rc + ptr++) = (byte)v;
-	      v >>= 8;
-	      j += 1;
-	    }
-	  i += 1;
-	}
-      olen -= r;
-      if (olen > 0)
-	keccakF(S);
-    }
-  if (n & 7)
-    rc[nn - 1] &= (1 << (n & 7)) - 1;
-  
-  return rc;
 }
 
