@@ -34,6 +34,6 @@ def sha3override(self, filename):
         return sha3override_old(self, filename)
     return hashsum
 
-sha3override_old = SHA3.digestFile
-SHA3.digestFile = sha3override
+sha3override_old = SHA3.digest_file
+SHA3.digest_file = sha3override
 
