@@ -22,12 +22,8 @@
 
 /**
  * Initialise Keccak sponge
- * 
- * @param  bitrate   The bitrate
- * @param  capacity  The capacity
- * @param  output    The output size
  */
-extern void initialise(long bitrate, long capacity, long output);
+extern void initialise();
 
 
 /**
