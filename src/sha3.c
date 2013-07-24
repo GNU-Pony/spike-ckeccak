@@ -78,17 +78,6 @@ static long mlen = 0;
 
 
 /**
- * Gets the smallest, in value, of the arguments
- * 
- * @param   X  The first candidate
- * @param   Y  The second candidate
- * @return     The lowest candidate
- */
-#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
-
-
-
-/**
  * Copy an array segment into an array in start to end order
  * 
  * @param  src     The source array
@@ -295,7 +284,7 @@ static void keccakF(llong* A)
  */
 inline llong toLane(byte* message, long msglen, long off)
 {
-  long n = min(msglen, 128);
+  long n = msglen < 128 ? msglen : 128;
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
          ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
          ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
