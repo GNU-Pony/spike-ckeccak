@@ -9,16 +9,22 @@
 
 
 # NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
-CFLAGS=-Wall -Wextra -pedantic -O6
+CFLAGS=-Wall -Wextra -pedantic -O0
 CPPFLAGS=
 LDFLAGS=
 C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 
+all: c
 
-c: obj/sha3.o obj/mane.o
+c: bin/spike-ckeccak
+
+bin/spike-ckeccak: obj/sha3.o obj/mane.o
+	@mkdir -p "bin"
+	$(CC) $(C_FLAGS) -o "$@" $^
+
 obj/%.o: src/%.c src/%.h
-	mkdir -p "obj"
+	@mkdir -p "obj"
 	$(CC) $(C_FLAGS) -c -o "$@" "$<"
 
 
@@ -26,5 +32,5 @@ clean:
 	-rm -r obj bin 2>/dev/null
 
 
-.PHONY: clean c
+.PHONY: all c clean
 
