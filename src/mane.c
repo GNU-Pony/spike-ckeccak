@@ -57,7 +57,7 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
 	}
       
       blksize = stat(*(argv + f), &attr) ? 0 : attr.st_blksize;
-      if (blksize == 0)
+      if (blksize <= 0)
 	blksize = 4096;
       if (blksize > lastblksize)
 	chunk = (char*)realloc(chunk, lastblksize = blksize);
