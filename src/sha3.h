@@ -44,10 +44,9 @@ extern void update(char* msg, long msglen);
 /**
  * Absorb the last part of the message and squeeze the Keccak sponge
  * 
- * @param   msg         The rest of the message, may be {@code null}
- * @param   msglen      The length of the partial message
- * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
- * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+ * @param   msg     The rest of the message, may be {@code null}
+ * @param   msglen  The length of the partial message
+ * @return          The hash sum
  */
-extern char* digest(char* msg, long msglen, long withReturn);
+extern char* digest(char* msg, long msglen);
 

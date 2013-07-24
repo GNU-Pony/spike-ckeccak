@@ -55,48 +55,6 @@ static llong B[25];
  */
 static llong C[5];
 
-
-/**
- * The bitrate
- */
-static long r = 0;
-
-/**
- * The capacity
- */
-static long c = 0;
-
-/**
- * The output size
- */
-static long n = 0;
-
-/**
- * The state size
- */
-static long b = 0;
-
-/**
- * The word size
- */
-static long w = 0;
-
-/**
- * The word mask
- */
-static llong wmod = 0;
-
-/**
- * ℓ, the binary logarithm of the word size
- */
-static long l = 0;
-
-/**
- * 12 + 2ℓ, the number of rounds
- */
-static long nr = 0;
-    
-
 /**
  * The current state
  */
@@ -225,7 +183,7 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
  * @param   N:long   Rotation steps, may not be 0
  * @return   :llong  The value rotated
  */
-#define rotate64(X, N)  ((llong)((unsigned llong)(X) >> (64 - (N))) + ((X) << (N)))
+#define rotate(X, N)  ((llong)((unsigned llong)(X) >> (64 - (N))) + ((X) << (N)))
 
 
 /**
@@ -264,14 +222,14 @@ static void keccakFRound(llong* A, llong rc)
   __C(4,  20, 21, 22, 23, 24);
   #undef __C
   
-  da = C[4] ^ rotate64(C[1], 1);
-  dd = C[2] ^ rotate64(C[4], 1);
-  db = C[0] ^ rotate64(C[2], 1);
-  de = C[3] ^ rotate64(C[0], 1);
-  dc = C[1] ^ rotate64(C[3], 1);
+  da = C[4] ^ rotate(C[1], 1);
+  dd = C[2] ^ rotate(C[4], 1);
+  db = C[0] ^ rotate(C[2], 1);
+  de = C[3] ^ rotate(C[0], 1);
+  dc = C[1] ^ rotate(C[3], 1);
   
   /* ρ and π steps, with last two part of θ */
-  #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate64(A[Ai] ^ Dv, R)
+  #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate(A[Ai] ^ Dv, R)
   B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
   __B( 5,  6, db, 44);  __B( 6, 21, de, 20);  __B( 7, 11, dc,  6);  __B( 8,  1, da, 36);  __B( 9, 16, dd, 55);
   __B(10, 12, dc, 43);  __B(11,  2, da,  3);  __B(12, 17, dd, 25);  __B(13,  7, db, 10);  __B(14, 22, de, 39);
@@ -332,13 +290,12 @@ static void keccakF(llong* A)
  * 
  * @param   message  The message
  * @param   msglen   The length of the message
- * @param   rr       Bitrate in bytes
  * @param   off      The offset in the message
  * @return           Lane
  */
-inline llong toLane64(byte* message, long msglen, long rr, long off)
+inline llong toLane(byte* message, long msglen, long off)
 {
-  long n = min(msglen, rr);
+  long n = min(msglen, 128);
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
          ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
          ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
@@ -355,22 +312,21 @@ inline llong toLane64(byte* message, long msglen, long rr, long off)
  * 
  * @param   msg     The message to pad
  * @param   len     The length of the message
- * @param   r       The bitrate
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
+inline byte* pad10star1(byte* msg, long len, long* outlen)
 {
   byte* message;
   
   long nrf = (len <<= 3) >> 3;
   long nbrf = len & 7;
-  long ll = len % r;
+  long ll = len & 1023;
   long i;
   
   byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
   
-  if ((r - 8 <= ll) && (ll <= r - 2))
+  if ((1016 <= ll) && (ll <= 1022))
     {
       message = (byte*)malloc(len = nrf + 1);
       message[nrf] = (byte)(b ^ 128);
@@ -380,7 +336,7 @@ inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
       char* M;
       long N;
       len = (nrf + 1) << 3;
-      len = ((len - (len % r) + (r - 8)) >> 3) + 1;
+      len = ((len - (len & 1023) + 1016) >> 3) + 1;
       message = (byte*)malloc(len);
       message[nrf] = b;
       N = len - nrf - 1;
@@ -455,14 +411,6 @@ extern void initialise()
 {
   long i;
   
-  r = 1024;
-  n = 576;
-  c = 576;
-  b = 1600;
-  w = 64;
-  l = 6;
-  nr = 24;
-  wmod = -1;
   S = (llong*)malloc(25 * sizeof(llong));
   M = (byte*)malloc(mlen = 409600);
   mptr = 0;
@@ -496,8 +444,6 @@ extern void dispose()
  */
 extern void update(byte* msg, long msglen)
 {
-  long rr = 128;
-  long ww = 8;
   long i, len;
   byte* message;
   
@@ -510,16 +456,16 @@ extern void update(byte* msg, long msglen)
     }
   arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
-  len -= len % ((r * b) >> 3);
+  len -= len % 204800;
   message = (byte*)malloc(len);
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
   revarraycopy(M, len, M, 0, mptr);
   
   /* Absorbing phase */
-  for (i = 0; i < len; i += rr)
+  for (i = 0; i < len; i += 128)
     {
-      #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+      #define __S(Si, OFF)  S[Si] ^= toLane(message, len, i + OFF)
       __S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
       __S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
       __S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -536,22 +482,18 @@ extern void update(byte* msg, long msglen)
 /**
  * Absorb the last part of the message and squeeze the Keccak sponge
  * 
- * @param   msg         The rest of the message, may be {@code null}
- * @param   msglen      The length of the partial message
- * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
- * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+ * @param   msg     The rest of the message, may be {@code null}
+ * @param   msglen  The length of the partial message
+ * @return          The hash sum
  */
-extern byte* digest(byte* msg, long msglen, boolean withReturn)
+extern byte* digest(byte* msg, long msglen)
 {
   byte* message;
   byte* rc;
-  long rr = 128, len;
-  long nn = (n + 7) >> 3, olen;
-  long ww = 8, ni;
-  long i, j = 0, ptr = 0, _;
+  long len, i, j, ptr = 0;
   
   if ((msg == null) || (msglen == 0))
-    message = pad10star1(M, mptr, r, &len);
+    message = pad10star1(M, mptr, &len);
   else
     {
       if (mptr + msglen > mlen)
@@ -562,16 +504,16 @@ extern byte* digest(byte* msg, long msglen, boolean withReturn)
 	  M = buf;
 	}
       arraycopy(msg, 0, M, mptr, msglen);
-      message = pad10star1(M, mptr + msglen, r, &len);
+      message = pad10star1(M, mptr + msglen, &len);
     }
   free(M);
   M = null;
-  rc = (byte*)malloc((n + 7) >> 3);
+  rc = (byte*)malloc(72);
   
   /* Absorbing phase */
-  for (i = 0; i < len; i += rr)
+  for (i = 0; i < len; i += 128)
     {
-      #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+      #define __S(Si, OFF)  S[Si] ^= toLane(message, len, i + OFF)
       __S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
       __S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
       __S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -584,36 +526,18 @@ extern byte* digest(byte* msg, long msglen, boolean withReturn)
   free(message);
   
   /* Squeezing phase */
-  olen = n;
-  if (withReturn)
+  i = 0;
+  while (i < 9)
     {
-      ni = min(25, rr);
-      while (olen > 0)
+      llong v = S[(i % 5) * 5 + i / 5];
+      for (j = 0; j < 8; j++)
 	{
-	  i = 0;
-	  while ((i < ni) && (j < nn))
-	    {
-	      llong v = S[(i % 5) * 5 + i / 5];
-	      for (_ = 0; _ < ww; _++)
-		{
-		  if (j < nn)
-		    rc[ptr++] = (byte)v;
-		  v >>= 8;
-		  j += 1;
-		}
-	      i += 1;
-	    }
-	  olen -= r;
-	  if (olen > 0)
-	    keccakF(S);
+	  rc[ptr++] = (byte)v;
+	  v >>= 8;
 	}
-      if ((n & 7))
-	rc[n >> 3] &= (1 << (n & 7)) - 1;
-      
-      return rc;
+      i += 1;
     }
-  while ((olen -= r) > 0)
-    keccakF(S);
-  return null;
+  
+  return rc;
 }
 
