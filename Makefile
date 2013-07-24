@@ -9,7 +9,7 @@
 
 
 # NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
-CFLAGS=-Wall -Wextra -pedantic -O0
+CFLAGS=-Wall -Wextra -pedantic -O6
 CPPFLAGS=
 LDFLAGS=
 C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)

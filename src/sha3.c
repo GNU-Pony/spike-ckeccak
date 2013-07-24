@@ -416,8 +416,9 @@ extern void dispose()
  */
 extern void update(byte* msg, long msglen)
 {
-  long i, len;
+  long i, len, nnn;
   byte* message;
+  byte* _msg;
   
   if (mptr + msglen > mlen)
     {
@@ -429,15 +430,15 @@ extern void update(byte* msg, long msglen)
   arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % 204800;
-  message = (byte*)malloc(len);
+  _msg = message = (byte*)malloc(len);
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
-  revarraycopy(M, len, M, 0, mptr);
+  revarraycopy(M, nnn = len, M, 0, mptr);
   
   /* Absorbing phase */
-  for (i = 0; i < len; i += 128)
+  for (i = 0; i < nnn; i += 128)
     {
-      #define __S(Si, OFF)  S[Si] ^= toLane(message, len, i + OFF)
+      #define __S(Si, OFF)  S[Si] ^= toLane(message, len, OFF)
       __S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
       __S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
       __S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -445,9 +446,11 @@ extern void update(byte* msg, long msglen)
       __S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
       #undef __S
       keccakF(S);
+      message += 128;
+      len -= 128;
     }
   
-  free(message);
+  free(_msg);
 }
     
 
@@ -462,7 +465,8 @@ extern byte* digest(byte* msg, long msglen)
 {
   byte* message;
   byte* rc;
-  long len, i, j, ptr = 0;
+  byte* _msg;
+  long len, i, j, ptr = 0, nnn;
   
   if ((msg == null) || (msglen == 0))
     message = pad10star1(M, mptr, &len);
@@ -481,11 +485,13 @@ extern byte* digest(byte* msg, long msglen)
   free(M);
   M = null;
   rc = (byte*)malloc(72);
+  nnn = len;
+  _msg = message;
   
   /* Absorbing phase */
-  for (i = 0; i < len; i += 128)
+  for (i = 0; i < nnn; i += 128)
     {
-      #define __S(Si, OFF)  S[Si] ^= toLane(message, len, i + OFF)
+      #define __S(Si, OFF)  S[Si] ^= toLane(message, len, OFF)
       __S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
       __S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
       __S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -493,13 +499,14 @@ extern byte* digest(byte* msg, long msglen)
       __S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
       #undef __S
       keccakF(S);
+      message += 128;
+      len -= 128;
     }
   
-  free(message);
+  free(_msg);
   
   /* Squeezing phase */
-  i = 0;
-  while (i < 9)
+  for (i = 0; i < 9; i++)
     {
       llong v = S[(i % 5) * 5 + i / 5];
       for (j = 0; j < 8; j++)
@@ -507,7 +514,6 @@ extern byte* digest(byte* msg, long msglen)
 	  rc[ptr++] = (byte)v;
 	  v >>= 8;
 	}
-      i += 1;
     }
   
   return rc;
