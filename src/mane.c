@@ -35,18 +35,14 @@
  */
 int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actually supposed to say ‘mane’. */
 {
-  long f, fail;
+  char* chunk = (char*)malloc(4096);
+  long f, fail = false, lastblksize = 4096;
+  char out[144];
   
-  char* out = (char*)malloc(144);
-  
-  fail = false;
-  stdin = null;
-    
   for (f = 1; f < argc; f++)
     {
       FILE* file;
-      long blksize, b, outptr;
-      char* chunk;
+      long b, blksize, outptr, read;
       char* bs;
       
       file = fopen(*(argv + f), "r");
@@ -58,41 +54,33 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
 	  continue;
 	}
       
-      initialise();
       blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
-      chunk = (char*)malloc(blksize);
-      for (;;)
-	{
-	  long read = fread(chunk, 1, blksize, file);
-	  if (read <= 0)
-	    break;
+      if (blksize > lastblksize)
+	chunk = (char*)realloc(chunk, lastblksize = blksize);
+      
+      initialise();
+      while ((read = fread(chunk, 1, blksize, file)) > 0)
 	  update(chunk, read);
-	}
-      free(chunk);
+      
       bs = digest(null, 0);
       dispose();
       
-      outptr = 0;
-      for (b = 0; b < 72; b++)
+      for (outptr = b = 0; b < 72; b++)
 	{
-	  char v = bs[b];
+	  char v = *(bs + b);
 	  *(out + outptr++) = HEXADECA[(v >> 4) & 15];
 	  *(out + outptr++) = HEXADECA[v & 15];
 	}
       printf("%s\n", out);
       if (bs != null)
 	free(bs);
+      
       fclose(file);
     }
-    
-  if (out != null)
-    free(out);
   
+  free(chunk);
   fflush(stdout);
   fflush(stderr);
-  if (fail)
-    return 1;
-  
-  return 0;
+  return fail;
 }
 
