@@ -27,7 +27,7 @@ def sha3override(self, filename):
     @return  :str          The hash sum in uppercase hexadecimal
     '''
     hashsum = Popen(['spike-ckeccak', filename], stdout = PIPE).communicate()[0]
-    hashsum = filename.decode('utf-8', 'error')
+    hashsum = hashsum.decode('utf-8', 'error')
     if hashsum.endswith('\n'):
         hashsum = hashsum[:-1]
     if '*' in hashsum:
