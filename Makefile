@@ -25,6 +25,9 @@ DATA = /share
 LICENSES = $(DATA)/licenses
 PKGNAME = spike-ckeccak
 
+CHECKFILE = LICENSE
+CHECKHASH = 827821773FDCE6F142E8C0446530DA596369AB63D5230E2A7D786AEAC0BDC406F1A50D8550F718A70384526980FEEADBF43348ADDBC50A13478B1A958C0E9218DC172DA2CB7591ED
+
 
 all: c
 
@@ -37,6 +40,10 @@ bin/spike-ckeccak: obj/sha3.o obj/mane.o
 obj/%.o: src/%.c src/%.h
 	@mkdir -p "obj"
 	$(CC) $(C_FLAGS) -c -o "$@" "$<"
+
+
+check: bin/spike-ckeccak
+	@[ $$(bin/spike-ckeccak $(CHECKFILE)) = $(CHECKHASH) ]
 
 
 install: bin/spike-ckeccak
