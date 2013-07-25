@@ -69,5 +69,5 @@ clean:
 	-rm -r obj bin 2>/dev/null
 
 
-.PHONY: all c install uninstall clean
+.PHONY: all c check install uninstall clean
 
