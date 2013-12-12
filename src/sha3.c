@@ -86,7 +86,7 @@ static long mlen = 0;
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
 {
   long i;
   src += soff;
@@ -156,7 +156,7 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
 {
   long copyi;
   for (copyi = length - 1; copyi >= 0; copyi--)
@@ -265,7 +265,7 @@ static void keccakF(llong* A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-inline llong toLane(byte* message, long msglen, long off)
+static inline llong toLane(byte* message, long msglen, long off)
 {
   long n = msglen < 128 ? msglen : 128;
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
@@ -287,7 +287,7 @@ inline llong toLane(byte* message, long msglen, long off)
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-inline byte* pad10star1(byte* msg, long len, long* outlen)
+static inline byte* pad10star1(byte* msg, long len, long* outlen)
 {
   byte* message;
   
