@@ -290,7 +290,7 @@ static inline int8_t* pad10star1(int8_t* msg, long len, long* outlen)
   
   if ((1016 <= ll) && (ll <= 1022))
     {
-      message = (int8_t*)malloc(len = nrf + 1);
+      message = malloc((len = nrf + 1) * sizeof(int8_t));
       message[nrf] = (int8_t)(b ^ 128);
     }
   else
@@ -299,7 +299,7 @@ static inline int8_t* pad10star1(int8_t* msg, long len, long* outlen)
       long N;
       len = (nrf + 1) << 3;
       len = ((len - (len & 1023) + 1016) >> 3) + 1;
-      message = (int8_t*)malloc(len);
+      message = malloc(len * sizeof(int8_t));
       message[nrf] = b;
       N = len - nrf - 1;
       M = message + nrf + 1;
@@ -373,8 +373,8 @@ void initialise()
 {
   long i;
   
-  S = (llong*)malloc(25 * sizeof(llong));
-  M = (int8_t*)malloc(mlen = 409600);
+  S = malloc(25 * sizeof(llong));
+  M = malloc((mlen = 409600) * sizeof(int8_t));
   mptr = 0;
   
   for (i = 0; i < 25; i++)
@@ -412,7 +412,7 @@ void update(int8_t* msg, long msglen)
   
   if (mptr + msglen > mlen)
     {
-      int8_t* buf = (int8_t*)malloc(mlen = (mlen + msglen) << 1);
+      int8_t* buf = malloc((mlen = (mlen + msglen) << 1) * sizeof(int8_t));
       arraycopy(M, 0, buf, 0, mptr);
       free(M);
       M = buf;
@@ -420,7 +420,7 @@ void update(int8_t* msg, long msglen)
   arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % 204800;
-  _msg = message = (int8_t*)malloc(len);
+  _msg = message = malloc(len * sizeof(int8_t));
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
   revarraycopy(M, nnn = len, M, 0, mptr);
@@ -464,7 +464,7 @@ int8_t* digest(int8_t* msg, long msglen)
     {
       if (mptr + msglen > mlen)
 	{
-	  int8_t* buf = (int8_t*)malloc(mlen += msglen);
+	  int8_t* buf = malloc((mlen += msglen) * sizeof(int8_t));
 	  arraycopy(M, 0, buf, 0, mptr);
 	  free(M);
 	  M = buf;
@@ -474,7 +474,7 @@ int8_t* digest(int8_t* msg, long msglen)
     }
   free(M);
   M = NULL;
-  rc = (int8_t*)malloc(72);
+  rc = malloc(72 * sizeof(int8_t));
   nnn = len;
   _msg = message;
   
