@@ -39,7 +39,7 @@ void dispose(void);
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-void update(int8_t* msg, long msglen);
+void update(int8_t* restrict msg, long msglen);
 
 
 /**
@@ -49,5 +49,5 @@ void update(int8_t* msg, long msglen);
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-int8_t* digest(int8_t* msg, long msglen);
+int8_t* digest(int8_t* restrict msg, long msglen);
 

@@ -76,7 +76,7 @@ static long mlen = 0;
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static inline void arraycopy(int8_t* src, long soff, int8_t* dest, long doff, long length)
+static inline void arraycopy(int8_t* restrict src, long soff, int8_t* restrict dest, long doff, long length)
 {
   long i;
   src += soff;
@@ -146,7 +146,7 @@ static inline void arraycopy(int8_t* src, long soff, int8_t* dest, long doff, lo
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static inline void revarraycopy(int8_t* src, long soff, int8_t* dest, long doff, long length)
+static inline void revarraycopy(int8_t* restrict src, long soff, int8_t* restrict dest, long doff, long length)
 {
   long copyi;
   for (copyi = length - 1; copyi >= 0; copyi--)
@@ -171,7 +171,7 @@ static inline void revarraycopy(int8_t* src, long soff, int8_t* dest, long doff,
  * @param  A   The current state
  * @param  rc  Round constant
  */
-static void keccakFRound(lane_t* A, lane_t rc)
+static void keccakFRound(lane_t* restrict A, lane_t rc)
 {
   lane_t da, db, dc, dd, de;
   
@@ -218,7 +218,7 @@ static void keccakFRound(lane_t* A, lane_t rc)
  * 
  * @param  A  The current state
  */
-static void keccakF(lane_t* A)
+static void keccakF(lane_t* restrict A)
 {
   keccakFRound(A, 0x0000000000000001);
   keccakFRound(A, 0x0000000000008082);
@@ -255,7 +255,7 @@ static void keccakF(lane_t* A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static inline lane_t toLane(int8_t* message, long msglen, long off)
+static inline lane_t toLane(int8_t* restrict message, long msglen, long off)
 {
   long n = msglen < 128 ? msglen : 128;
   return ((off + 7 < n) ? ((lane_t)(message[off + 7] & 255) << 56) : 0L) |
@@ -277,7 +277,7 @@ static inline lane_t toLane(int8_t* message, long msglen, long off)
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-static inline int8_t* pad10star1(int8_t* msg, long len, long* outlen)
+static inline int8_t* pad10star1(int8_t* restrict msg, long len, long* restrict outlen)
 {
   int8_t* message;
   
@@ -404,7 +404,7 @@ void dispose(void)
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-void update(int8_t* msg, long msglen)
+void update(int8_t* restrict msg, long msglen)
 {
   long i, len, nnn;
   int8_t* message;
@@ -451,7 +451,7 @@ void update(int8_t* msg, long msglen)
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-int8_t* digest(int8_t* msg, long msglen)
+int8_t* digest(int8_t* restrict msg, long msglen)
 {
   int8_t* message;
   int8_t* rc;
