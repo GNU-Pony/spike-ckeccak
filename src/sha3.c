@@ -379,7 +379,7 @@ inline byte* pad10star1(byte* msg, long len, long* outlen)
 /**
  * Initialise Keccak[r=1024, c=576, n=576] sponge
  */
-extern void initialise()
+void initialise()
 {
   long i;
   
@@ -394,7 +394,7 @@ extern void initialise()
 /**
  * Dispose of the Keccak sponge
  */
-extern void dispose()
+void dispose()
 {
   if (S != null)
     {
@@ -414,7 +414,7 @@ extern void dispose()
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void update(byte* msg, long msglen)
+void update(byte* msg, long msglen)
 {
   long i, len, nnn;
   byte* message;
@@ -461,7 +461,7 @@ extern void update(byte* msg, long msglen)
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-extern byte* digest(byte* msg, long msglen)
+byte* digest(byte* msg, long msglen)
 {
   byte* message;
   byte* rc;

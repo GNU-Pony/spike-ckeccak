@@ -23,13 +23,13 @@
 /**
  * Initialise Keccak sponge
  */
-extern void initialise();
+void initialise();
 
 
 /**
  * Dispose of the Keccak sponge
  */
-extern void dispose();
+void dispose();
 
 
 /**
@@ -38,7 +38,7 @@ extern void dispose();
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void update(char* msg, long msglen);
+void update(char* msg, long msglen);
 
 
 /**
@@ -48,5 +48,5 @@ extern void update(char* msg, long msglen);
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-extern char* digest(char* msg, long msglen);
+char* digest(char* msg, long msglen);
 
