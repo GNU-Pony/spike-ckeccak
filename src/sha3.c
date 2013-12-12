@@ -19,15 +19,15 @@
 #include "sha3.h"
 
 
-#define llong   int_fast64_t
-#define ullong  uint_fast64_t
+#define lane_t    int_fast64_t
+#define ulane_t  uint_fast64_t
 
 
 
 /**
  * Round contants
  */
-static const int_fast64_t RC[] = {
+static const lane_t RC[] = {
   0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
   0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
   0x000000000000008AL, 0x0000000000000088L, 0x0000000080008009L, 0x000000008000000AL,
@@ -38,17 +38,17 @@ static const int_fast64_t RC[] = {
 /**
  * Keccak-f round temporary
  */
-static int_fast64_t B[25];
+static lane_t B[25];
 
 /**
  * Keccak-f round temporary
  */
-static int_fast64_t C[5];
+static lane_t C[5];
 
 /**
  * The current state
  */
-static int_fast64_t* S = NULL;
+static lane_t* S = NULL;
 
 /**
  * Left over water to fill the sponge with at next update
@@ -158,11 +158,11 @@ static inline void revarraycopy(int8_t* src, long soff, int8_t* dest, long doff,
 /**
  * Rotate a 64-bit word
  * 
- * @param   X:llong  The value to rotate
- * @param   N:long   Rotation steps, may not be 0
- * @return   :llong  The value rotated
+ * @param   X:lane_t  The value to rotate
+ * @param   N:long    Rotation steps, may not be 0
+ * @return   :lane_t  The value rotated
  */
-#define rotate(X, N)  ((llong)((ullong)(X) >> (64 - (N))) + ((X) << (N)))
+#define rotate(X, N)  ((lane_t)((ulane_t)(X) >> (64 - (N))) + ((X) << (N)))
 
 
 /**
@@ -171,9 +171,9 @@ static inline void revarraycopy(int8_t* src, long soff, int8_t* dest, long doff,
  * @param  A   The current state
  * @param  rc  Round constant
  */
-static void keccakFRound(llong* A, llong rc)
+static void keccakFRound(lane_t* A, lane_t rc)
 {
-  llong da, db, dc, dd, de;
+  lane_t da, db, dc, dd, de;
   
   /* θ step (step 1 and 2 of 3) */
   #define __C(I, J0, J1, J2, J3, J4)  C[I] = (A[J0] ^ A[J1]) ^ (A[J2] ^ A[J3]) ^ A[J4]
@@ -218,7 +218,7 @@ static void keccakFRound(llong* A, llong rc)
  * 
  * @param  A  The current state
  */
-static void keccakF(llong* A)
+static void keccakF(lane_t* A)
 {
   keccakFRound(A, 0x0000000000000001);
   keccakFRound(A, 0x0000000000008082);
@@ -255,17 +255,17 @@ static void keccakF(llong* A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static inline llong toLane(int8_t* message, long msglen, long off)
+static inline lane_t toLane(int8_t* message, long msglen, long off)
 {
   long n = msglen < 128 ? msglen : 128;
-  return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
-         ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
-         ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
-         ((off + 4 < n) ? ((llong)(message[off + 4] & 255) << 32) : 0L) |
-         ((off + 3 < n) ? ((llong)(message[off + 3] & 255) << 24) : 0L) |
-         ((off + 2 < n) ? ((llong)(message[off + 2] & 255) << 16) : 0L) |
-         ((off + 1 < n) ? ((llong)(message[off + 1] & 255) <<  8) : 0L) |
-         ((off     < n) ? ((llong)(message[off    ] & 255)      ) : 0L);
+  return ((off + 7 < n) ? ((lane_t)(message[off + 7] & 255) << 56) : 0L) |
+         ((off + 6 < n) ? ((lane_t)(message[off + 6] & 255) << 48) : 0L) |
+         ((off + 5 < n) ? ((lane_t)(message[off + 5] & 255) << 40) : 0L) |
+         ((off + 4 < n) ? ((lane_t)(message[off + 4] & 255) << 32) : 0L) |
+         ((off + 3 < n) ? ((lane_t)(message[off + 3] & 255) << 24) : 0L) |
+         ((off + 2 < n) ? ((lane_t)(message[off + 2] & 255) << 16) : 0L) |
+         ((off + 1 < n) ? ((lane_t)(message[off + 1] & 255) <<  8) : 0L) |
+         ((off     < n) ? ((lane_t)(message[off    ] & 255)      ) : 0L);
 }
 
 
@@ -373,7 +373,7 @@ void initialise(void)
 {
   long i;
   
-  S = malloc(25 * sizeof(llong));
+  S = malloc(25 * sizeof(lane_t));
   M = malloc((mlen = 409600) * sizeof(int8_t));
   mptr = 0;
   
@@ -498,7 +498,7 @@ int8_t* digest(int8_t* msg, long msglen)
   /* Squeezing phase */
   for (i = 0; i < 9; i++)
     {
-      llong v = S[(i % 5) * 5 + i / 5];
+      lane_t v = S[(i % 5) * 5 + i / 5];
       for (j = 0; j < 8; j++)
 	{
 	  rc[ptr++] = (int8_t)v;
