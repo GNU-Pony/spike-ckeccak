@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
+#include <inttypes.h>
 
 
 
@@ -38,7 +39,7 @@ void dispose();
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-void update(char* msg, long msglen);
+void update(int8_t* msg, long msglen);
 
 
 /**
@@ -48,5 +49,5 @@ void update(char* msg, long msglen);
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-char* digest(char* msg, long msglen);
+int8_t* digest(int8_t* msg, long msglen);
 

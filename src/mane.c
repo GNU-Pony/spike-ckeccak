@@ -19,10 +19,6 @@
 #include "mane.h"
 
 
-#define false 0
-#define true  1
-#define null  0
-
 #define HEXADECA "0123456789ABCDEF"
 
 
@@ -35,24 +31,26 @@
  */
 int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actually supposed to say ‘mane’. */
 {
-  char* chunk = (char*)malloc(4096);
-  long f, fail = false, lastblksize = 4096;
+  int8_t* chunk = malloc(4096 * sizeof(int8_t));
+  int_fast8_t fail = 0;
+  long lastblksize = 4096;
   char out[145];
   struct stat attr;
+  int8_t v;
+  int f;
+  FILE* file;
+  long b, blksize, outptr, read;
+  int8_t* bs;    
   *(out + 144) = 0;
   
   for (f = 1; f < argc; f++)
     {
-      FILE* file;
-      long b, blksize, outptr, read;
-      char* bs;
-      
       file = fopen(*(argv + f), "r");
-      if (file == null)
+      if (file == NULL)
 	{
 	  printf("***\n");
 	  perror("fopen");
-	  fail = true;
+	  fail = 1;
 	  continue;
 	}
       
@@ -60,23 +58,23 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
       if (blksize <= 0)
 	blksize = 4096;
       if (blksize > lastblksize)
-	chunk = (char*)realloc(chunk, lastblksize = blksize);
+	chunk = realloc(chunk, (lastblksize = blksize) * sizeof(int8_t));
       
       initialise();
       while ((read = fread(chunk, 1, blksize, file)) > 0)
 	  update(chunk, read);
       
-      bs = digest(null, 0);
+      bs = digest(NULL, 0);
       dispose();
       
       for (outptr = b = 0; b < 72; b++)
 	{
-	  char v = *(bs + b);
+	  v = *(bs + b);
 	  *(out + outptr++) = HEXADECA[(v >> 4) & 15];
 	  *(out + outptr++) = HEXADECA[v & 15];
 	}
       printf("%s\n", out);
-      if (bs != null)
+      if (bs != NULL)
 	free(bs);
       
       fclose(file);

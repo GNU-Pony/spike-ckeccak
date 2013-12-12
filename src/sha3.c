@@ -19,25 +19,15 @@
 #include "sha3.h"
 
 
-#if __x86_64__ || __ppc64__
-  #define llong long int
-#else
-  #define llong long long int
-#endif
-
-
-#define null    0
-#define byte    char
-#define boolean long
-#define true    1
-#define false   0
+#define llong   int_fast64_t
+#define ullong  uint_fast64_t
 
 
 
 /**
  * Round contants
  */
-static const llong RC[] = {
+static const int_fast64_t RC[] = {
   0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
   0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
   0x000000000000008AL, 0x0000000000000088L, 0x0000000080008009L, 0x000000008000000AL,
@@ -48,22 +38,22 @@ static const llong RC[] = {
 /**
  * Keccak-f round temporary
  */
-static llong B[25];
+static int_fast64_t B[25];
 
 /**
  * Keccak-f round temporary
  */
-static llong C[5];
+static int_fast64_t C[5];
 
 /**
  * The current state
  */
-static llong* S = null;
+static int_fast64_t* S = NULL;
 
 /**
  * Left over water to fill the sponge with at next update
  */
-static byte* M = null;
+static int8_t* M = NULL;
 
 /**
  * Pointer for {@link #M}
@@ -86,7 +76,7 @@ static long mlen = 0;
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static inline void arraycopy(int8_t* src, long soff, int8_t* dest, long doff, long length)
 {
   long i;
   src += soff;
@@ -156,7 +146,7 @@ static inline void arraycopy(byte* src, long soff, byte* dest, long doff, long l
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static inline void revarraycopy(int8_t* src, long soff, int8_t* dest, long doff, long length)
 {
   long copyi;
   for (copyi = length - 1; copyi >= 0; copyi--)
@@ -172,7 +162,7 @@ static inline void revarraycopy(byte* src, long soff, byte* dest, long doff, lon
  * @param   N:long   Rotation steps, may not be 0
  * @return   :llong  The value rotated
  */
-#define rotate(X, N)  ((llong)((unsigned llong)(X) >> (64 - (N))) + ((X) << (N)))
+#define rotate(X, N)  ((llong)((ullong)(X) >> (64 - (N))) + ((X) << (N)))
 
 
 /**
@@ -265,7 +255,7 @@ static void keccakF(llong* A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static inline llong toLane(byte* message, long msglen, long off)
+static inline llong toLane(int8_t* message, long msglen, long off)
 {
   long n = msglen < 128 ? msglen : 128;
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
@@ -287,29 +277,29 @@ static inline llong toLane(byte* message, long msglen, long off)
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-static inline byte* pad10star1(byte* msg, long len, long* outlen)
+static inline int8_t* pad10star1(int8_t* msg, long len, long* outlen)
 {
-  byte* message;
+  int8_t* message;
   
   long nrf = (len <<= 3) >> 3;
   long nbrf = len & 7;
   long ll = len & 1023;
   long i;
   
-  byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
+  int8_t b = (int8_t)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
   
   if ((1016 <= ll) && (ll <= 1022))
     {
-      message = (byte*)malloc(len = nrf + 1);
-      message[nrf] = (byte)(b ^ 128);
+      message = (int8_t*)malloc(len = nrf + 1);
+      message[nrf] = (int8_t)(b ^ 128);
     }
   else
     {
-      byte* M;
+      int8_t* M;
       long N;
       len = (nrf + 1) << 3;
       len = ((len - (len & 1023) + 1016) >> 3) + 1;
-      message = (byte*)malloc(len);
+      message = (int8_t*)malloc(len);
       message[nrf] = b;
       N = len - nrf - 1;
       M = message + nrf + 1;
@@ -384,7 +374,7 @@ void initialise()
   long i;
   
   S = (llong*)malloc(25 * sizeof(llong));
-  M = (byte*)malloc(mlen = 409600);
+  M = (int8_t*)malloc(mlen = 409600);
   mptr = 0;
   
   for (i = 0; i < 25; i++)
@@ -396,15 +386,15 @@ void initialise()
  */
 void dispose()
 {
-  if (S != null)
+  if (S != NULL)
     {
       free(S);
-      S = null;
+      S = NULL;
     }
-  if (M != null)
+  if (M != NULL)
     {
       free(M);
-      M = null;
+      M = NULL;
     }
 }
 
@@ -414,15 +404,15 @@ void dispose()
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-void update(byte* msg, long msglen)
+void update(int8_t* msg, long msglen)
 {
   long i, len, nnn;
-  byte* message;
-  byte* _msg;
+  int8_t* message;
+  int8_t* _msg;
   
   if (mptr + msglen > mlen)
     {
-      byte* buf = (byte*)malloc(mlen = (mlen + msglen) << 1);
+      int8_t* buf = (int8_t*)malloc(mlen = (mlen + msglen) << 1);
       arraycopy(M, 0, buf, 0, mptr);
       free(M);
       M = buf;
@@ -430,7 +420,7 @@ void update(byte* msg, long msglen)
   arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % 204800;
-  _msg = message = (byte*)malloc(len);
+  _msg = message = (int8_t*)malloc(len);
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
   revarraycopy(M, nnn = len, M, 0, mptr);
@@ -457,24 +447,24 @@ void update(byte* msg, long msglen)
 /**
  * Absorb the last part of the message and squeeze the Keccak sponge
  * 
- * @param   msg     The rest of the message, may be {@code null}
+ * @param   msg     The rest of the message, may be {@code NULL}
  * @param   msglen  The length of the partial message
  * @return          The hash sum
  */
-byte* digest(byte* msg, long msglen)
+int8_t* digest(int8_t* msg, long msglen)
 {
-  byte* message;
-  byte* rc;
-  byte* _msg;
+  int8_t* message;
+  int8_t* rc;
+  int8_t* _msg;
   long len, i, j, ptr = 0, nnn;
   
-  if ((msg == null) || (msglen == 0))
+  if ((msg == NULL) || (msglen == 0))
     message = pad10star1(M, mptr, &len);
   else
     {
       if (mptr + msglen > mlen)
 	{
-	  byte* buf = (byte*)malloc(mlen += msglen);
+	  int8_t* buf = (int8_t*)malloc(mlen += msglen);
 	  arraycopy(M, 0, buf, 0, mptr);
 	  free(M);
 	  M = buf;
@@ -483,8 +473,8 @@ byte* digest(byte* msg, long msglen)
       message = pad10star1(M, mptr + msglen, &len);
     }
   free(M);
-  M = null;
-  rc = (byte*)malloc(72);
+  M = NULL;
+  rc = (int8_t*)malloc(72);
   nnn = len;
   _msg = message;
   
@@ -511,7 +501,7 @@ byte* digest(byte* msg, long msglen)
       llong v = S[(i % 5) * 5 + i / 5];
       for (j = 0; j < 8; j++)
 	{
-	  rc[ptr++] = (byte)v;
+	  rc[ptr++] = (int8_t)v;
 	  v >>= 8;
 	}
     }

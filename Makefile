@@ -11,7 +11,7 @@
 # NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
 OPTIMISATION=-O6
 
-CFLAGS = -Wall -Wextra -pedantic $(OPTIMISATION)
+CFLAGS = -Wall -Wextra -pedantic $(OPTIMISATION) -std=c99
 CPPFLAGS =
 LDFLAGS =
 C_FLAGS = $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)

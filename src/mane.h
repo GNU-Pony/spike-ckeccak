@@ -18,6 +18,7 @@
  */
 #include <stdio.h>
 #include <sys/stat.h>
+#include <inttypes.h>
 
 #include "sha3.h"
 
