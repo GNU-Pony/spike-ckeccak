@@ -369,7 +369,7 @@ static inline int8_t* pad10star1(int8_t* msg, long len, long* outlen)
 /**
  * Initialise Keccak[r=1024, c=576, n=576] sponge
  */
-void initialise()
+void initialise(void)
 {
   long i;
   
@@ -384,7 +384,7 @@ void initialise()
 /**
  * Dispose of the Keccak sponge
  */
-void dispose()
+void dispose(void)
 {
   if (S != NULL)
     {

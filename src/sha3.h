@@ -24,13 +24,13 @@
 /**
  * Initialise Keccak sponge
  */
-void initialise();
+void initialise(void);
 
 
 /**
  * Dispose of the Keccak sponge
  */
-void dispose();
+void dispose(void);
 
 
 /**
