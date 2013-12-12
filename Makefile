@@ -40,6 +40,7 @@ bin/spike-ckeccak: obj/sha3.o obj/mane.o
 	@mkdir -p "bin"
 	$(CC) $(C_FLAGS) -o "$@" $^
 
+obj/mane.o: src/sha3.h
 obj/%.o: src/%.c src/%.h
 	@mkdir -p "obj"
 	$(CC) $(C_FLAGS) -c -o "$@" "$<"

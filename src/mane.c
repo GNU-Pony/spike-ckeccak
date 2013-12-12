@@ -40,7 +40,7 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
   int f;
   FILE* file;
   long b, blksize, outptr, read;
-  int8_t* bs;    
+  int8_t* bs;
   *(out + 144) = 0;
   
   for (f = 1; f < argc; f++)
