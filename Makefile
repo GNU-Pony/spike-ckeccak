@@ -28,6 +28,9 @@ PKGNAME = spike-ckeccak
 CHECKFILE = LICENSE
 CHECKHASH = 493411C4AE0C731998D8D46EF70938F71AF826E024545020628A995B074BA8FA1CFE704C5BB891C0303685A7A6C20E10FB48C8F14F7A5F1959CAF4C664DE4EF5EDBE3DC796E0CD73
 
+TEMPFILE = /tmp/devel-spike-ckeccak-benchmark-testfile
+BENCHMARK_SIZE = 100
+
 
 all: c
 
@@ -63,6 +66,15 @@ uninstall:
 	-rmdir -- "$(DESTDIR)$(OPTBIN)"/spike-ckeccak
 	-rm -- "$(DESTDIR)$(OPT)"/spike-ckeccak.py
 	-rmdir -- "$(DESTDIR)$(OPT)"
+
+
+benchmark: bin/spike-ckeccak
+	@echo 'Generating test file ($(BENCHMARK_SIZE) MB)'
+	@dd if=/dev/zero bs=1048576 count=$(BENCHMARK_SIZE) > "$(TEMPFILE)" 2>/dev/null
+	@echo 'Running test'
+	@time bin/spike-ckeccak "$(TEMPFILE)" >/dev/null
+	@echo 'Cleaning up'
+	@rm "$(TEMPFILE)"
 
 
 clean:
