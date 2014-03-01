@@ -2,7 +2,7 @@ Spike extension with C implementation of sha3sum calculation
 for faster verification of downloaded sources.
 
 This implementation is estimated to be c:a 297 times faster
-then Spike's built-in Python 3 implementation.
+than Spike's built-in Python 3 implementation.
 
 
 For best performace, strip symbols for the binary, but do
