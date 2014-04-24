@@ -24,16 +24,19 @@
 
 
 
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wsign-conversion"
 /**
  * Round contants
  */
 static const lane_t RC[] = {
-  0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
-  0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
-  0x000000000000008AL, 0x0000000000000088L, 0x0000000080008009L, 0x000000008000000AL,
-  0x000000008000808BL, 0x800000000000008BL, 0x8000000000008089L, 0x8000000000008003L,
-  0x8000000000008002L, 0x8000000000000080L, 0x000000000000800AL, 0x800000008000000AL,
-  0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L};
+  0x0000000000000001LL, 0x0000000000008082LL, 0x800000000000808ALL, 0x8000000080008000LL,
+  0x000000000000808BLL, 0x0000000080000001LL, 0x8000000080008081LL, 0x8000000000008009LL,
+  0x000000000000008ALL, 0x0000000000000088LL, 0x0000000080008009LL, 0x000000008000000ALL,
+  0x000000008000808BLL, 0x800000000000008BLL, 0x8000000000008089LL, 0x8000000000008003LL,
+  0x8000000000008002LL, 0x8000000000000080LL, 0x000000000000800ALL, 0x800000008000000ALL,
+  0x8000000080008081LL, 0x8000000000008080LL, 0x0000000080000001LL, 0x8000000080008008LL};
+# pragma GCC diagnostic pop
 
 /**
  * Keccak-f round temporary
@@ -220,30 +223,33 @@ static void keccakFRound(lane_t* restrict A, lane_t rc)
  */
 static void keccakF(lane_t* restrict A)
 {
-  keccakFRound(A, 0x0000000000000001);
-  keccakFRound(A, 0x0000000000008082);
-  keccakFRound(A, 0x800000000000808A);
-  keccakFRound(A, 0x8000000080008000);
-  keccakFRound(A, 0x000000000000808B);
-  keccakFRound(A, 0x0000000080000001);
-  keccakFRound(A, 0x8000000080008081);
-  keccakFRound(A, 0x8000000000008009);
-  keccakFRound(A, 0x000000000000008A);
-  keccakFRound(A, 0x0000000000000088);
-  keccakFRound(A, 0x0000000080008009);
-  keccakFRound(A, 0x000000008000000A);
-  keccakFRound(A, 0x000000008000808B);
-  keccakFRound(A, 0x800000000000008B);
-  keccakFRound(A, 0x8000000000008089);
-  keccakFRound(A, 0x8000000000008003);
-  keccakFRound(A, 0x8000000000008002);
-  keccakFRound(A, 0x8000000000000080);
-  keccakFRound(A, 0x000000000000800A);
-  keccakFRound(A, 0x800000008000000A);
-  keccakFRound(A, 0x8000000080008081);
-  keccakFRound(A, 0x8000000000008080);
-  keccakFRound(A, 0x0000000080000001);
-  keccakFRound(A, 0x8000000080008008);
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wsign-conversion"
+  keccakFRound(A, 0x0000000000000001LL);
+  keccakFRound(A, 0x0000000000008082LL);
+  keccakFRound(A, 0x800000000000808ALL);
+  keccakFRound(A, 0x8000000080008000LL);
+  keccakFRound(A, 0x000000000000808BLL);
+  keccakFRound(A, 0x0000000080000001LL);
+  keccakFRound(A, 0x8000000080008081LL);
+  keccakFRound(A, 0x8000000000008009LL);
+  keccakFRound(A, 0x000000000000008ALL);
+  keccakFRound(A, 0x0000000000000088LL);
+  keccakFRound(A, 0x0000000080008009LL);
+  keccakFRound(A, 0x000000008000000ALL);
+  keccakFRound(A, 0x000000008000808BLL);
+  keccakFRound(A, 0x800000000000008BLL);
+  keccakFRound(A, 0x8000000000008089LL);
+  keccakFRound(A, 0x8000000000008003LL);
+  keccakFRound(A, 0x8000000000008002LL);
+  keccakFRound(A, 0x8000000000000080LL);
+  keccakFRound(A, 0x000000000000800ALL);
+  keccakFRound(A, 0x800000008000000ALL);
+  keccakFRound(A, 0x8000000080008081LL);
+  keccakFRound(A, 0x8000000000008080LL);
+  keccakFRound(A, 0x0000000080000001LL);
+  keccakFRound(A, 0x8000000080008008LL);
+# pragma GCC diagnostic pop
 }
 
 
@@ -290,22 +296,22 @@ static inline int8_t* pad10star1(int8_t* restrict msg, long len, long* restrict 
   
   if ((1016 <= ll) && (ll <= 1022))
     {
-      message = malloc((len = nrf + 1) * sizeof(int8_t));
+      message = malloc((size_t)(len = nrf + 1) * sizeof(int8_t));
       message[nrf] = (int8_t)(b ^ 128);
     }
   else
     {
-      int8_t* M;
-      long N;
+      int8_t* m;
+      long n;
       len = (nrf + 1) << 3;
       len = ((len - (len & 1023) + 1016) >> 3) + 1;
-      message = malloc(len * sizeof(int8_t));
+      message = malloc((size_t)len * sizeof(int8_t));
       message[nrf] = b;
-      N = len - nrf - 1;
-      M = message + nrf + 1;
+      n = len - nrf - 1;
+      m = message + nrf + 1;
       
-      #define __(X)  M[X] = 0
-      #define __0  *M = 0
+      #define __(X)  m[X] = 0
+      #define __0  *m = 0
       #define __1  __(0x01)
       #define __2  __(0x02); __(0x03)
       #define __3  __(0x04); __(0x05); __(0x06); __(0x07)
@@ -326,24 +332,24 @@ static inline int8_t* pad10star1(int8_t* restrict msg, long len, long* restrict 
                    __(0xE0); __(0xE1); __(0xE2); __(0xE3); __(0xE4); __(0xE5); __(0xE6); __(0xE7); __(0xE8); __(0xE9); __(0xEA); __(0xEB); __(0xEC); __(0xED); __(0xEE); __(0xEF); \
                    __(0xF0); __(0xF1); __(0xF2); __(0xF3); __(0xF4); __(0xF5); __(0xF6); __(0xF7); __(0xF8); __(0xF9); __(0xFA); __(0xFB); __(0xFC); __(0xFD); __(0xFE); __(0xFF)
       
-      if ((N & 15))
+      if ((n & 15))
 	{
-	  if ((N &   1))  {  __0;   M += 1;  }
-	  if ((N &   2))  {  __0;  __1;   M += 2;  }
-	  if ((N &   4))  {  __0;  __1;  __2;   M += 4;  }
-	  if ((N &   8))  {  __0;  __1;  __2;  __3;   M += 8;  }
+	  if ((n &   1))  {  __0;   m += 1;  }
+	  if ((n &   2))  {  __0;  __1;   m += 2;  }
+	  if ((n &   4))  {  __0;  __1;  __2;   m += 4;  }
+	  if ((n &   8))  {  __0;  __1;  __2;  __3;   m += 8;  }
 	}
-      if ((N & 240))
+      if ((n & 240))
 	{
-	  if ((N &  16))  {  __0;  __1;  __2;  __3;  __4;   M += 16;  }
-	  if ((N &  32))  {  __0;  __1;  __2;  __3;  __4;  __5;   M += 32;  }
-	  if ((N &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   M += 64;  }
-	  if ((N & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   M += 128;  }
+	  if ((n &  16))  {  __0;  __1;  __2;  __3;  __4;   m += 16;  }
+	  if ((n &  32))  {  __0;  __1;  __2;  __3;  __4;  __5;   m += 32;  }
+	  if ((n &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   m += 64;  }
+	  if ((n & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   m += 128;  }
 	}
-      N &= ~255;
-      for (i = 0; i < N; i += 256)
+      n &= ~255;
+      for (i = 0; i < n; i += 256)
 	{
-	  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;  __8;   M += 256;
+	  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;  __8;   m += 256;
 	}
       
       #undef __8
@@ -374,7 +380,7 @@ void initialise(void)
   long i;
   
   S = malloc(25 * sizeof(lane_t));
-  M = malloc((mlen = 409600) * sizeof(int8_t));
+  M = malloc((size_t)(mlen = 409600) * sizeof(int8_t));
   mptr = 0;
   
   for (i = 0; i < 25; i++)
@@ -412,7 +418,7 @@ void update(int8_t* restrict msg, long msglen)
   
   if (mptr + msglen > mlen)
     {
-      int8_t* buf = malloc((mlen = (mlen + msglen) << 1) * sizeof(int8_t));
+      int8_t* buf = malloc((size_t)(mlen = (mlen + msglen) << 1) * sizeof(int8_t));
       arraycopy(M, 0, buf, 0, mptr);
       free(M);
       M = buf;
@@ -420,7 +426,7 @@ void update(int8_t* restrict msg, long msglen)
   arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % 204800;
-  _msg = message = malloc(len * sizeof(int8_t));
+  _msg = message = malloc((size_t)len * sizeof(int8_t));
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
   revarraycopy(M, nnn = len, M, 0, mptr);
@@ -464,7 +470,7 @@ int8_t* digest(int8_t* restrict msg, long msglen)
     {
       if (mptr + msglen > mlen)
 	{
-	  int8_t* buf = malloc((mlen += msglen) * sizeof(int8_t));
+	  int8_t* buf = malloc((size_t)(mlen += msglen) * sizeof(int8_t));
 	  arraycopy(M, 0, buf, 0, mptr);
 	  free(M);
 	  M = buf;

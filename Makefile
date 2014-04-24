@@ -10,10 +10,21 @@
 
 OPTIMISATION=-Ofast
 
-CFLAGS = -Wall -Wextra -pedantic $(OPTIMISATION) -std=c99
+WARN = -Wall -Wextra -pedantic -Wdouble-promotion -Wformat=2 -Winit-self -Wmissing-include-dirs  \
+       -Wtrampolines -Wfloat-equal -Wshadow -Wmissing-prototypes -Wmissing-declarations          \
+       -Wredundant-decls -Wnested-externs -Wno-variadic-macros -Wsync-nand                       \
+       -Wunsafe-loop-optimizations -Wcast-align -Wstrict-overflow -Wdeclaration-after-statement  \
+       -Wundef -Wbad-function-cast -Wcast-qual -Wwrite-strings -Wlogical-op -Waggregate-return   \
+       -Wstrict-prototypes -Wold-style-definition -Wpacked -Wvector-operation-performance        \
+       -Wunsuffixed-float-constants -Wsuggest-attribute=const -Wsuggest-attribute=noreturn       \
+       -Wsuggest-attribute=pure -Wsuggest-attribute=format -Wnormalized=nfkc -Wconversion        \
+       -fstrict-aliasing -fstrict-overflow -fipa-pure-const -ftree-vrp -fstack-usage             \
+       -funsafe-loop-optimizations
+
+CFLAGS =
 CPPFLAGS =
 LDFLAGS =
-C_FLAGS = $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+C_FLAGS = $(WARN) $(OPTIMISATION) -std=c99 $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 SPIKE = $${SPIKE_PATH}
 OPT = $(SPIKE)/add-on

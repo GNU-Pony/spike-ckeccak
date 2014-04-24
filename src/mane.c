@@ -56,12 +56,12 @@ int main(int argc, char** argv) /* Yeah... some dweeb misspelled it, it is actua
       
       blksize = stat(*(argv + f), &attr) ? 0 : attr.st_blksize;
       if (blksize <= 0)
-	blksize = 4096;
-      if (blksize > lastblksize)
-	chunk = realloc(chunk, (lastblksize = blksize) * sizeof(int8_t));
+	chunk = realloc(chunk, (size_t)(lastblksize = blksize = 4096) * sizeof(int8_t));
+      else if (blksize > lastblksize)
+	chunk = realloc(chunk, (size_t)(lastblksize = blksize) * sizeof(int8_t));
       
       initialise();
-      while ((read = fread(chunk, 1, blksize, file)) > 0)
+      while ((read = (long)fread(chunk, 1, (size_t)blksize, file)) > 0)
 	  update(chunk, read);
       
       bs = digest(NULL, 0);
