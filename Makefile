@@ -8,8 +8,7 @@
 # [GNU All Permissive License]
 
 
-# NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
-OPTIMISATION=-O6
+OPTIMISATION=-Ofast
 
 CFLAGS = -Wall -Wextra -pedantic $(OPTIMISATION) -std=c99
 CPPFLAGS =
@@ -32,8 +31,10 @@ TEMPFILE = /tmp/devel-spike-ckeccak-benchmark-testfile
 BENCHMARK_SIZE = 100
 
 
+.PHONY: all
 all: c
 
+.PHONY: c
 c: bin/spike-ckeccak
 
 bin/spike-ckeccak: obj/sha3.o obj/mane.o
@@ -46,10 +47,12 @@ obj/%.o: src/%.c src/%.h
 	$(CC) $(C_FLAGS) -c -o "$@" "$<"
 
 
+.PHONY: check
 check: bin/spike-ckeccak
 	@[ $$(bin/spike-ckeccak $(CHECKFILE)) = $(CHECKHASH) ] && echo 'sha3sum test pass for file: $(CHECKFILE)'
 
 
+.PHONY: install
 install: bin/spike-ckeccak
 	install -d -- "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"
 	install -m644 -- COPYING LICENSE "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"
@@ -59,6 +62,7 @@ install: bin/spike-ckeccak
 	install -m755 -- bin/spike-ckeccak "$(DESTDIR)$(OPTBIN)"
 
 
+.PHONY: uninstall
 uninstall:
 	-rm -- "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"/COPYING
 	-rm -- "$(DESTDIR)$(PREFIX)$(LICENSES)/$(PKGNAME)"/LICENSE
@@ -69,6 +73,7 @@ uninstall:
 	-rmdir -- "$(DESTDIR)$(OPT)"
 
 
+.PHONY: benchmark
 benchmark: bin/spike-ckeccak
 	@echo 'Generating test file ($(BENCHMARK_SIZE) MB)'
 	@dd if=/dev/zero bs=1048576 count=$(BENCHMARK_SIZE) > "$(TEMPFILE)" 2>/dev/null
@@ -78,9 +83,7 @@ benchmark: bin/spike-ckeccak
 	@rm "$(TEMPFILE)"
 
 
+.PHONY: clean
 clean:
 	-rm -r obj bin 2>/dev/null
-
-
-.PHONY: all c check install uninstall clean
 
